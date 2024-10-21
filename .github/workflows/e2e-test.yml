@@ -34,7 +34,7 @@ jobs:
       - name: Cypress e2e tests 🧪
         uses: cypress-io/github-action@v6.7.6
         with:
-          start: npm run mock:server
+          start: npm runstart
           config-file: cypress/config/local.config.ts
           # Enable for for cy cloud
           # record: true
