@@ -153,7 +153,7 @@ export const UpdateMovieResponseSchema = z
           .openapi({ example: 2010, description: 'Release year' }),
         rating: z.number().openapi({ example: 7.5, description: 'Rating' })
       })
-      .openapi('Updated movie data'),
+      .openapi({ description: 'Updated movie data' }),
     error: z
       .string()
       .optional()
