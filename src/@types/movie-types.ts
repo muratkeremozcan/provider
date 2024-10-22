@@ -9,7 +9,6 @@ import type {
   UpdateMovieSchema,
   UpdateMovieResponseSchema
 } from './schema'
-// import type { Movie } from '@prisma/client'
 
 // Zod Key feature 2: link the schemas to the types
 
