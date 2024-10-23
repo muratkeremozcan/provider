@@ -5,14 +5,14 @@ import { openApiDoc } from './openapi-generator'
 
 // Generate OpenAPI docs with Zod
 
-// convert OpenAPI document to YAML
-const yamlDoc = stringify(openApiDoc)
+// convert OpenAPI document to YML
+const ymlDoc = stringify(openApiDoc)
 
 const scriptDir = path.resolve(__dirname)
-// write the YAML file
-fs.writeFileSync(`${scriptDir}/openapi.yaml`, yamlDoc)
+// write the YML file
+fs.writeFileSync(`${scriptDir}/openapi.yml`, ymlDoc)
 
-console.log('OpenAPI document generated in YAML format.')
+console.log('OpenAPI document generated in YML format.')
 
 // Json version
 const jsonDoc = JSON.stringify(openApiDoc, null, 2)
