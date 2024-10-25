@@ -4,7 +4,7 @@ import type {
   CreateMovieResponse,
   GetMovieResponse,
   DeleteMovieResponse
-} from './@types'
+} from '../src/@types'
 import type { OpenAPIV3_1 } from 'openapi-types'
 
 export {}
