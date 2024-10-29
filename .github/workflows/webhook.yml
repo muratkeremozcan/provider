@@ -48,3 +48,5 @@ jobs:
 
       - name: Run provider contract tests
         run: npm run test:provider-ci
+
+      #  trigger
