@@ -1,0 +1,50 @@
+# A webhook that runs when the consumer side publishes a pact
+# and here on the provider side we trigger the provider tests
+
+name: contract_requiring_verification_published
+
+on:
+  repository_dispatch: # A repository_dispatch in GitHub is a HTTP request to your GitHub project instructing GitHub to start any action or webhook
+    types:
+      - contract_requiring_verification_published
+
+concurrency:
+  group: ${{ github.ref }} && ${{ github.workflow }}
+  cancel-in-progress: true
+
+env:
+  PACT_PAYLOAD_URL: ${{ github.event.client_payload.pact_url }} # This is because we want to verify the newly published contract from the consumer that caused the contract_requiring_verification_published event to be triggered
+  PACT_BROKER_BASE_URL: ${{ secrets.PACT_BROKER_BASE_URL }}
+  PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+  GITHUB_SHA: ${{ github.event.client_payload.sha }}
+  GITHUB_BRANCH: ${{ github.event.client_payload.branch }}
+  DATABASE_URL: 'file:./dev.db'
+  PORT: 3001
+
+jobs:
+  contract-verification-via-webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout specific SHA if webhook providers pact URL
+        uses: actions/checkout@v4
+        if: ${{env.PACT_PAYLOAD_URL}}
+        with:
+          ref: ${{env.GITHUB_SHA}}
+
+      - name: Read Node version from .nvmrc
+        id: node_version
+        run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_ENV
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Log Payload Variables
+        run: |
+          echo "PACT_PAYLOAD_URL: ${{ env.PACT_PAYLOAD_URL }}; GITHUB_SHA: ${{ env.GITHUB_SHA }}; GITHUB_BRANCH: ${{ env.GITHUB_BRANCH }}"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run provider contract tests
+        run: npm run test:provider-ci
