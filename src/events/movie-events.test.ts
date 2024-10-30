@@ -51,7 +51,6 @@ describe('produceMovieEvent', () => {
     expect(producer.connect).toHaveBeenCalled()
     expect(producer.send).toHaveBeenCalledWith(event)
     expect(producer.disconnect).toHaveBeenCalled()
-    // expect(fs.appendFile).toHaveBeenCalled() // can't make it work
     expect(console.table).toHaveBeenCalled()
     expect(result).toEqual({
       topic: 'movie-created',
