@@ -43,7 +43,7 @@
     "@types/express": "4.17.21",
     "@types/jest": "29.5.14",
     "@types/lodash": "4.17.13",
-    "@types/node": "20.17.3",
+    "@types/node": "20.17.4",
     "@typescript-eslint/eslint-plugin": "8.12.2",
     "@typescript-eslint/parser": "8.12.2",
     "@useoptic/optic": "1.0.4",
