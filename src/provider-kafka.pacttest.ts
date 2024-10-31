@@ -1,5 +1,6 @@
 import { MessageProviderPact } from '@pact-foundation/pact'
 import { messageProviders } from './test-helpers/message-providers'
+import { stateHandlers } from './test-helpers/state-handlers'
 import { buildMessageVerifierOptions } from './test-helpers/pact-utils/build-verifier-options'
 
 // 1) Run the provider service, optionally start the kafka cluster (if you want to see the console logs)
@@ -17,7 +18,8 @@ describe('Pact Verification', () => {
     includeMainAndDeployed: PACT_BREAKING_CHANGE !== 'true', // if it is a breaking change, set the env var
     enablePending: PACT_ENABLE_PENDING === 'true',
     // logLevel: 'debug',
-    messageProviders // the bread and butter of the test is here
+    messageProviders, // the bread and butter of the test is here
+    stateHandlers
   })
   const verifier = new MessageProviderPact(options)
 
