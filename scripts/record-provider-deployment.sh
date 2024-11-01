@@ -14,7 +14,7 @@ if [ "$GITHUB_BRANCH" = "main" ]; then
     --version $GITHUB_SHA \
     --environment $npm_config_env
 
-  # Have to disable the contract because of the limit of 2 contracts per trial account #
+  # Have to disable the contract because of the limit of 2 contracts per trial account
   # Record deployment for MoviesAPI-event-producer
   # pact-broker record-deployment \
   #   --pacticipant MoviesAPI-event-producer \
