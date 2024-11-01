@@ -11,7 +11,8 @@ const PACT_BREAKING_CHANGE = process.env.PACT_BREAKING_CHANGE || 'false'
 const PACT_ENABLE_PENDING = process.env.PACT_ENABLE_PENDING || 'false'
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'local'
 
-describe('Pact Verification', () => {
+// Have to disable the contract because of the limit of 2 contracts per trial account
+describe.skip('Pact Verification', () => {
   const options = buildMessageVerifierOptions({
     provider: 'MoviesAPI-event-producer', // ensure unique provider name for message pacts
     consumer: 'WebConsumer-event-consumer', // with multiple pact test files, best to specify the consumer
