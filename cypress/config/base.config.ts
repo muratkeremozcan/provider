@@ -3,7 +3,6 @@ import tasks from '../support/tasks'
 import esbuildPreprocessor from '../support/esbuild-preprocessor'
 
 export const baseConfig: Cypress.ConfigOptions = {
-  projectId: 'kdr2hm',
   viewportHeight: 1280,
   viewportWidth: 1280,
 
