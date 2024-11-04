@@ -42,12 +42,12 @@ export function handlePactBrokerUrlAndSelectors({
   }
 
   // Use the Pact Broker URL and consumer version selectors
-  usePactBrokerUrlAndSelectors(
+  usePactBrokerUrlAndSelectors({
     pactBrokerUrl,
     consumer,
     includeMainAndDeployed,
     options
-  )
+  })
 }
 
 /**
@@ -146,12 +146,17 @@ function usePactPayloadUrl(
  * @param includeMainAndDeployed - Whether to include main and deployed/released selectors.
  * @param options - The verifier options to update.
  */
-function usePactBrokerUrlAndSelectors(
-  pactBrokerUrl: string | undefined,
-  consumer: string | undefined,
-  includeMainAndDeployed: boolean,
+function usePactBrokerUrlAndSelectors({
+  pactBrokerUrl,
+  consumer,
+  includeMainAndDeployed,
+  options
+}: {
+  pactBrokerUrl: string | undefined
+  consumer: string | undefined
+  includeMainAndDeployed: boolean
   options: PactMessageProviderOptions | VerifierOptions
-) {
+}) {
   if (!pactBrokerUrl) {
     throw new Error('PACT_BROKER_BASE_URL is required but not set.')
   }
@@ -179,43 +184,53 @@ function usePactBrokerUrlAndSelectors(
       'Only running the matching branch, this is useful when introducing breaking changes'
     )
   }
+
+  // Log the consumer version selectors for debugging
+  console.log(
+    'Consumer Version Selectors:',
+    JSON.stringify(options.consumerVersionSelectors, null, 2)
+  )
 }
 
 /**
  * Builds an array of `ConsumerVersionSelector` objects for Pact verification.
  *
- * Generates selectors to determine which consumer pacts should be verified against the provider.
- * By default, it includes pacts from all branches of the consumer, including feature branches.
- * Optionally includes pacts from the consumer's `main` branch and deployed or released versions.
+ * This function generates selectors that determine which consumer pacts should be verified against the provider.
+ * By default, it includes pacts from branches matching the provider's branch, and optionally includes pacts from
+ * the consumer's `main` branch and deployed or released versions.
+ *
+ * **Note:** The `branch: '*'` selector has been removed to prevent the provider from verifying pacts from all
+ * consumer branches, which can include irrelevant or unverified branches.
  *
  * @param consumer - The name of the consumer to verify against. If `undefined`, applies to all consumers.
- * @param includeMainAndDeployed - When `true` (default), includes `mainBranch` and `deployedOrReleased` selectors for broader verification. When `false`, only verifies pacts from branches matching the provider's branch.
+ * @param includeMainAndDeployed - When `true` (default), includes `mainBranch` and `deployedOrReleased` selectors for broader verification.
+ *                                 When `false`, only verifies pacts from matching branches.
  * @returns An array of `ConsumerVersionSelector` objects for Pact verification.
  *
  * @example
- * // Verify pacts for a specific consumer, including all selectors (default behavior)
- * const selectors = buildConsumerVersionSelectors('MoviesAPI');
+ * // Verify pacts for a specific consumer, including main and deployed versions (default behavior)
+ * const selectors = buildConsumerVersionSelectors('WebConsumer');
  * // Result:
  * // [
- * //   { consumer: 'MoviesAPI', branch: '*' },
- * //   { consumer: 'MoviesAPI', mainBranch: true },
- * //   { consumer: 'MoviesAPI', deployedOrReleased: true }
+ * //   { consumer: 'WebConsumer', matchingBranch: true },
+ * //   { consumer: 'WebConsumer', mainBranch: true },
+ * //   { consumer: 'WebConsumer', deployedOrReleased: true }
  * // ]
  *
  * @example
  * // Verify pacts for a specific consumer, excluding mainBranch and deployedOrReleased
- * const selectors = buildConsumerVersionSelectors('MoviesAPI', false);
+ * const selectors = buildConsumerVersionSelectors('WebConsumer', false);
  * // Result:
  * // [
- * //   { consumer: 'MoviesAPI', matchingBranch: true }
+ * //   { consumer: 'WebConsumer', matchingBranch: true }
  * // ]
  *
  * @example
- * // Verify pacts for all consumers, including all selectors
+ * // Verify pacts for all consumers, including main and deployed versions
  * const selectors = buildConsumerVersionSelectors(undefined);
  * // Result:
  * // [
- * //   { branch: '*' },
+ * //   { matchingBranch: true },
  * //   { mainBranch: true },
  * //   { deployedOrReleased: true }
  * // ]
@@ -225,7 +240,7 @@ function usePactBrokerUrlAndSelectors(
  * const selectors = buildConsumerVersionSelectors(undefined, false);
  * // Result:
  * // [
- * //   { branch: '*' }
+ * //   { matchingBranch: true }
  * // ]
  *
  * @see https://docs.pact.io/pact_broker/advanced_topics/consumer_version_selectors
@@ -234,25 +249,29 @@ function buildConsumerVersionSelectors(
   consumer: string | undefined,
   includeMainAndDeployed = true
 ): ConsumerVersionSelector[] {
-  // Create the base selector object. If a specific consumer is provided, include it in the selector.
+  // Create the base selector object.
+  // If a specific consumer is provided, include it in the selector.
   const baseSelector: Partial<ConsumerVersionSelector> = consumer
     ? { consumer }
     : {}
 
-  // If 'includeMainAndDeployed' is true (default case), include selectors for:
-  // - All branches of the consumer (branch: '*')
+  // Start with selectors that always apply.
+  // - 'matchingBranch: true' includes branches that match the provider's branch.
+  const selectors: ConsumerVersionSelector[] = [
+    { ...baseSelector, matchingBranch: true } // Includes matching branches
+  ]
+
+  // If 'includeMainAndDeployed' is true, include selectors for:
   // - The main branch of the consumer (mainBranch: true)
   // - Deployed or released versions of the consumer (deployedOrReleased: true)
   if (includeMainAndDeployed) {
-    return [
-      { ...baseSelector, branch: '*' }, // Includes all feature branches of the consumer
-      { ...baseSelector, mainBranch: true }, // Includes the main branch of the consumer
-      { ...baseSelector, deployedOrReleased: true } // Includes deployed or released consumer versions
-    ]
-  } else {
-    // If 'includeMainAndDeployed' is false, restrict the verification to the matching branch,
-    // which matches the provider's branch. This is useful when working with feature branches
-    // where both consumer and provider are working on the same feature.
-    return [{ ...baseSelector, matchingBranch: true }]
+    selectors.push({ ...baseSelector, mainBranch: true }) // Includes the main branch of the consumer
+    selectors.push({ ...baseSelector, deployedOrReleased: true }) // Includes deployed or released consumer versions
   }
+
+  // The 'branch: "*"' selector has been intentionally removed to prevent
+  // verification of pacts from all branches, which may include irrelevant or
+  // unverified branches.
+
+  return selectors
 }

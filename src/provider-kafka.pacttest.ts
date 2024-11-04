@@ -12,7 +12,7 @@ const PACT_ENABLE_PENDING = process.env.PACT_ENABLE_PENDING || 'false'
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'local'
 
 // Have to disable the contract because of the limit of 2 contracts per trial account
-describe.skip('Pact Verification', () => {
+describe.skip('Pact Verification for Message queue', () => {
   const options = buildMessageVerifierOptions({
     provider: 'MoviesAPI-event-producer', // ensure unique provider name for message pacts
     consumer: 'WebConsumer-event-consumer', // with multiple pact test files, best to specify the consumer
@@ -34,7 +34,7 @@ describe.skip('Pact Verification', () => {
     jest.restoreAllMocks()
   })
 
-  it('should validate the expectations of movie-consumer', async () => {
+  it('should validate the expectations of WebConsumer-event-consumer', async () => {
     try {
       const output = await verifier.verify()
       console.log('Pact Message Verification Complete!')

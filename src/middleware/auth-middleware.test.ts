@@ -1,49 +1,66 @@
 import type { Request, Response, NextFunction } from 'express'
-import { validateId } from './validate-movie-id'
+import { authMiddleware } from './auth-middleware'
 
-describe('validateId middleware', () => {
+describe('authMiddleware', () => {
   let mockRequest: Partial<Request>
   let mockResponse: Partial<Response>
   let nextFunction: NextFunction
 
   beforeEach(() => {
     mockRequest = {
-      params: {}
+      headers: {}
     }
     mockResponse = {
-      status: jest.fn().mockReturnThis(), // mocked to return this (the mockResponse object), allowing method chaining like res.status().json().
+      status: jest.fn().mockReturnThis(),
       json: jest.fn()
     }
     nextFunction = jest.fn()
   })
 
-  it('should pass valid movie ID', () => {
-    mockRequest.params = { id: '123' }
-    validateId(mockRequest as Request, mockResponse as Response, nextFunction)
+  it('should call next() exactly once for valid token', () => {
+    const validDate = new Date()
+    mockRequest.headers = { authorization: `Bearer ${validDate.toISOString()}` }
+    authMiddleware(
+      mockRequest as Request,
+      mockResponse as Response,
+      nextFunction
+    )
 
-    expect(mockRequest.params.id).toBe('123')
-    expect(nextFunction).toHaveBeenCalled()
+    expect(nextFunction).toHaveBeenCalledTimes(1)
     expect(mockResponse.status).not.toHaveBeenCalled()
     expect(mockResponse.json).not.toHaveBeenCalled()
   })
 
-  it('should return 400 for invalid movie ID', () => {
-    mockRequest.params = { id: 'abc' }
-    validateId(mockRequest as Request, mockResponse as Response, nextFunction)
+  it('should return 401 when no token is provided', () => {
+    authMiddleware(
+      mockRequest as Request,
+      mockResponse as Response,
+      nextFunction
+    )
 
-    expect(mockResponse.status).toHaveBeenCalledWith(400)
+    expect(mockResponse.status).toHaveBeenCalledWith(401)
     expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Invalid movie ID provided'
+      error: 'Unauthorized; no Authorization header.',
+      status: 401
     })
     expect(nextFunction).not.toHaveBeenCalled()
   })
 
-  it('should handle missing ID parameter', () => {
-    validateId(mockRequest as Request, mockResponse as Response, nextFunction)
+  it('should return 401 for expired token', () => {
+    const expiredDate = new Date(Date.now() - 3601 * 1000) // 1 hour and 1 second ago
+    mockRequest.headers = {
+      authorization: `Bearer ${expiredDate.toISOString()}`
+    }
+    authMiddleware(
+      mockRequest as Request,
+      mockResponse as Response,
+      nextFunction
+    )
 
-    expect(mockResponse.status).toHaveBeenCalledWith(400)
+    expect(mockResponse.status).toHaveBeenCalledWith(401)
     expect(mockResponse.json).toHaveBeenCalledWith({
-      error: 'Invalid movie ID provided'
+      error: 'Unauthorized; not valid timestamp.',
+      status: 401
     })
     expect(nextFunction).not.toHaveBeenCalled()
   })
