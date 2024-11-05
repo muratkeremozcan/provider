@@ -102,3 +102,10 @@ jobs:
       - name: Record provider deployment
         if: github.ref == 'refs/heads/main'
         run: npm run record:provider:deployment --env=dev
+
+      # New Step: Run contract tests for main branch regardless of breaking change flag
+      - name: Run contract tests for main branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "Running provider contract tests for main branch without breaking change flag."
+          PACT_BREAKING_CHANGE=false npm run test:provider-ci
