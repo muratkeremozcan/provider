@@ -165,9 +165,11 @@ function getProviderVersionTags(): string[] {
   const tags = []
 
   if (isCI) {
-    // Since we always use 'dev' for DEPLOY_ENV in CI, otherwise add the logic to get env
     // only include dev if it's not a breaking change
-    if (!process.env.PACT_BREAKING_CHANGE) {
+    // Convert PACT_BREAKING_CHANGE to boolean
+    const isBreakingChange = process.env.PACT_BREAKING_CHANGE === 'true'
+    // Only include 'dev' if it's not a breaking change
+    if (!isBreakingChange) {
       tags.push('dev')
     }
 
