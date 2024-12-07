@@ -32,7 +32,8 @@
     "lint": "eslint --ext=.js,.ts,.tsx --fix",
     "generate:openapi": "tsx src/api-docs/openapi-writer.ts",
     "optic:lint": "optic lint src/api-docs/openapi.yml",
-    "optic:diff": "optic diff src/api-docs/openapi.yml --check --web --base main"
+    "optic:diff": "optic diff src/api-docs/openapi.yml --check --web --base main",
+    "generate:api-docs": "rm -rf docs && npx redocly build-docs src/api-docs/openapi.yml -o docs/api-docs.html"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "7.2.0",
@@ -52,6 +53,7 @@
     "@faker-js/faker": "9.3.0",
     "@pact-foundation/pact": "13.2.0",
     "@pact-foundation/pact-cli": "16.0.4",
+    "@redocly/cli": "1.25.15",
     "@types/cors": "2.8.17",
     "@types/express": "4.17.21",
     "@types/jest": "29.5.14",

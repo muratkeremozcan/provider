@@ -1,6 +1,6 @@
-# Cy, Node template
+# Provider
 
-A template with tooling, configuration and best practices for a Cy api e2e testing in a Node.js project.
+[![API Documentation](https://img.shields.io/badge/API-DOCUMENTATION-blue?style=flat-square)](https://muratkeremozcan.github.io/provider/api-docs.html)
 
 ## Setup
 
