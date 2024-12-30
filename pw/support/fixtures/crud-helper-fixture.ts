@@ -13,136 +13,132 @@ const commonHeaders = (token: string) => ({
   Authorization: token
 })
 
-export const test = baseApiRequestFixture.extend<{
-  addMovie: (
-    token: string,
-    body: Omit<Movie, 'id'>,
-    baseUrl?: string
-  ) => Promise<ApiRequestResponse<CreateMovieResponse>>
-  getAllMovies: (
-    token: string,
-    baseUrl?: string
-  ) => Promise<ApiRequestResponse<GetMovieResponse>>
-  getMovieById: (
-    token: string,
-    id: number,
-    baseUrl?: string
-  ) => Promise<ApiRequestResponse<GetMovieResponse>>
-  getMovieByName: (
-    token: string,
-    name: string,
-    baseUrl?: string
-  ) => Promise<ApiRequestResponse<GetMovieResponse>>
-  updateMovie: (
-    token: string,
-    id: number,
-    body: Partial<Movie>,
-    baseUrl?: string
-  ) => Promise<ApiRequestResponse<UpdateMovieResponse>>
-  deleteMovie: (
-    token: string,
-    id: number,
-    baseUrl?: string
-  ) => Promise<ApiRequestResponse<DeleteMovieResponse>>
-}>({
+// --- Define Each Function Signature as a Type ---
+type AddMovieFn = (
+  token: string,
+  body: Omit<Movie, 'id'>,
+  baseUrl?: string
+) => Promise<ApiRequestResponse<CreateMovieResponse>>
+
+type GetAllMoviesFn = (
+  token: string,
+  baseUrl?: string
+) => Promise<ApiRequestResponse<GetMovieResponse>>
+
+type GetMovieByIdFn = (
+  token: string,
+  id: number,
+  baseUrl?: string
+) => Promise<ApiRequestResponse<GetMovieResponse>>
+
+type GetMovieByNameFn = (
+  token: string,
+  name: string,
+  baseUrl?: string
+) => Promise<ApiRequestResponse<GetMovieResponse>>
+
+type UpdateMovieFn = (
+  token: string,
+  id: number,
+  body: Partial<Movie>,
+  baseUrl?: string
+) => Promise<ApiRequestResponse<UpdateMovieResponse>>
+
+type DeleteMovieFn = (
+  token: string,
+  id: number,
+  baseUrl?: string
+) => Promise<ApiRequestResponse<DeleteMovieResponse>>
+
+// --- Group Them All Together ---
+type MovieApiMethods = {
+  addMovie: AddMovieFn
+  getAllMovies: GetAllMoviesFn
+  getMovieById: GetMovieByIdFn
+  getMovieByName: GetMovieByNameFn
+  updateMovie: UpdateMovieFn
+  deleteMovie: DeleteMovieFn
+}
+
+// --- Generic Type Extension ---
+export const test = baseApiRequestFixture.extend<MovieApiMethods>({
   addMovie: async ({ apiRequest }, use) => {
-    const addMovie = async (
-      token: string,
-      body: Omit<Movie, 'id'>,
-      baseUrl?: string
-    ) => {
-      return apiRequest<CreateMovieResponse>({
+    const addMovieFn: AddMovieFn = async (token, body, baseUrl) =>
+      apiRequest<CreateMovieResponse>({
         method: 'POST',
         url: '/movies',
         baseUrl,
         body,
         headers: commonHeaders(token)
       })
-    }
 
-    await use(addMovie)
+    await use(addMovieFn)
   },
 
   getAllMovies: async ({ apiRequest }, use) => {
-    const getAllMovies = async (token: string, baseUrl?: string) => {
-      return apiRequest<GetMovieResponse>({
+    const getAllMoviesFn: GetAllMoviesFn = async (token, baseUrl) =>
+      apiRequest<GetMovieResponse>({
         method: 'GET',
         url: '/movies',
         baseUrl,
         headers: commonHeaders(token)
       })
-    }
 
-    await use(getAllMovies)
+    await use(getAllMoviesFn)
   },
 
   getMovieById: async ({ apiRequest }, use) => {
-    const getMovieById = async (
-      token: string,
-      id: number,
-      baseUrl?: string
-    ) => {
-      return apiRequest<GetMovieResponse>({
+    const getMovieByIdFn: GetMovieByIdFn = async (token, id, baseUrl) =>
+      apiRequest<GetMovieResponse>({
         method: 'GET',
         url: `/movies/${id}`,
         baseUrl,
         headers: commonHeaders(token)
       })
-    }
 
-    await use(getMovieById)
+    await use(getMovieByIdFn)
   },
 
+  // getMovieByName
   getMovieByName: async ({ apiRequest }, use) => {
-    const getMovieByName = async (
-      token: string,
-      name: string,
-      baseUrl?: string
-    ) => {
-      // Construct the query parameters manually
+    const getMovieByNameFn: GetMovieByNameFn = async (token, name, baseUrl) => {
       const queryParams = new URLSearchParams({ name }).toString()
-      const url = `/movies?${queryParams}` // Append the query string to the endpoint
+      const url = `/movies?${queryParams}`
 
       return apiRequest<GetMovieResponse>({
         method: 'GET',
-        url, // Pass the constructed URL
+        url,
         baseUrl,
         headers: commonHeaders(token)
       })
     }
 
-    await use(getMovieByName)
+    await use(getMovieByNameFn)
   },
 
   updateMovie: async ({ apiRequest }, use) => {
-    const updateMovie = async (
-      token: string,
-      id: number,
-      body: Partial<Movie>,
-      baseUrl?: string
-    ) => {
-      return apiRequest<UpdateMovieResponse>({
+    const updateMovieFn: UpdateMovieFn = async (token, id, body, baseUrl) =>
+      apiRequest<UpdateMovieResponse>({
         method: 'PUT',
         url: `/movies/${id}`,
         baseUrl,
         body,
         headers: commonHeaders(token)
       })
-    }
 
-    await use(updateMovie)
+    await use(updateMovieFn)
   },
 
+  // deleteMovie
   deleteMovie: async ({ apiRequest }, use) => {
-    const deleteMovie = async (token: string, id: number, baseUrl?: string) => {
-      return apiRequest<DeleteMovieResponse>({
+    const deleteMovieFn: DeleteMovieFn = async (token, id, baseUrl) =>
+      apiRequest<DeleteMovieResponse>({
         method: 'DELETE',
         url: `/movies/${id}`,
         baseUrl,
         headers: commonHeaders(token)
       })
-    }
 
-    await use(deleteMovie)
+    await use(deleteMovieFn)
   }
 })
