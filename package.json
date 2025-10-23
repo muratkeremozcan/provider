@@ -60,7 +60,7 @@
     "@pact-foundation/pact": "16.0.2",
     "@pact-foundation/pact-cli": "16.0.4",
     "@playwright/test": "^1.49.1",
-    "@redocly/cli": "1.27.1",
+    "@redocly/cli": "2.7.0",
     "@types/cors": "2.8.17",
     "@types/express": "4.17.21",
     "@types/jest": "29.5.14",
