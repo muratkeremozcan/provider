@@ -42,7 +42,7 @@
     "pw:clear": "rm -rf test-results playwright-report playwright/.cache"
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "7.3.0",
+    "@asteasolutions/zod-to-openapi": "8.2.0",
     "@prisma/client": "6.2.1",
     "cors": "2.8.5",
     "express": "5.1.0",
